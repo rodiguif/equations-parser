@@ -957,4 +957,51 @@ MUP_NAMESPACE_START
     return new FunWeekYear(*this);
   }
 
+  //------------------------------------------------------------------------------
+  //                                                                             |
+  //            Function return the day of week of a date                       |
+  //            Usage: weekday("2024-04-20")                                    |
+  //                                                                             |
+  //------------------------------------------------------------------------------
+
+  FunWeekDay::FunWeekDay()
+    :ICallback(cmFUNC, _T("weekday"), -1)
+  {}
+
+  void FunWeekDay::Eval(ptr_val_type &ret, const ptr_val_type *a_pArg, int a_iArgc)
+  {
+    if (a_iArgc < 1) {
+      throw ParserError(ErrorContext(ecTOO_FEW_PARAMS, GetExprPos(), GetIdent()));
+    } else if (a_iArgc > 1) {
+      throw ParserError(ErrorContext(ecTOO_MANY_PARAMS, GetExprPos(), GetIdent()));
+    }
+
+    string_type date_time = a_pArg[0]->GetString();
+
+    struct tm date;
+    if (!strptime(date_time.c_str(), "%Y-%m-%d", &date)) {
+      raise_error(ecINVALID_DATE_FORMAT, 1, a_pArg);
+    }
+
+    int weekday = date.tm_wday + 1; // 1 is Sunday    
+
+    *ret = weekday;
+  }
+
+  ////------------------------------------------------------------------------------
+
+  const char_type* FunWeekDay::GetDesc() const
+  {
+    return _T("weekday(date) - Returns the day of week.");
+  }
+
+  ////------------------------------------------------------------------------------
+
+  IToken* FunWeekDay::Clone() const
+  {
+    return new FunWeekDay(*this);
+  }
+
+  //------------------------------------------------------------------------------
+
 MUP_NAMESPACE_END
